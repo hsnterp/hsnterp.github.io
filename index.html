@@ -143,15 +143,11 @@
   }
   .card-footer{
     display:flex;
-    justify-content:space-between;
+    justify-content:flex-end;
     align-items:center;
     font-family:var(--mono);
     font-size:11px;
     letter-spacing:.06em;
-  }
-  .card-status::before{
-    content:"● ";
-    color:var(--accent);
   }
   .card-arrow{ transition:transform .15s, color .15s; }
 
@@ -370,7 +366,6 @@
       <h2>Apple Drone</h2>
       <p class="card-spec">A drone that flies over fruit and feeds its camera into a vision language model for live classification.</p>
       <div class="card-footer">
-        <span class="card-status">OPERATIONAL</span>
         <span class="card-arrow">VIEW SPEC →</span>
       </div>
     </article>
@@ -383,7 +378,6 @@
       <h2>Jormungandr</h2>
       <p class="card-spec">A seismic phase picker compressed small enough to run on a Raspberry Pi, distilled from a much larger research model.</p>
       <div class="card-footer">
-        <span class="card-status">OPERATIONAL</span>
         <span class="card-arrow">VIEW SPEC →</span>
       </div>
     </article>
@@ -396,7 +390,6 @@
       <h2>Charcoal Sentinel</h2>
       <p class="card-spec">A multi-agent Earth Engine system for detecting charcoal and fuelwood-driven woodland degradation from satellite time series.</p>
       <div class="card-footer">
-        <span class="card-status">PROTOTYPE</span>
         <span class="card-arrow">VIEW SPEC →</span>
       </div>
     </article>
@@ -450,8 +443,7 @@
         ["Classifier", "Vision language model, given live camera frames instead of a fixed trained model"],
         ["Output", "Species and ripeness read out per detection"],
         ["Storage", "Detections logged to a database across flight sessions"],
-        ["Interface", "Web dashboard for reviewing sessions and results"],
-        ["Status", "Working prototype, demo video in progress"]
+        ["Interface", "Web dashboard for reviewing sessions and results"]
       ],
       writeup: [
         "This one started as a fairly standard drone plus fixed classifier setup, a Tello quadcopter flying over piles of fruit while a trained vision model sorted what it saw into species and ripeness categories. The interesting part of the project ended up being what happened after that first version worked: swapping the fixed classifier for a vision language model instead.",
@@ -473,8 +465,7 @@
         ["Output", "Per sample probability streams for event detection, P arrival, and S arrival"],
         ["Deployment", "Quantized to INT8 ONNX for CPU only inference on a Raspberry Pi"],
         ["Repository", "<a href=\"https://github.com/hsnterp/Jormungandr\" target=\"_blank\" rel=\"noopener\">github.com/hsnterp/Jormungandr</a>"],
-        ["Measured result", "On Raspberry Pi, INT8 ONNX runs a 60 second, 3 channel window in 2.392 ms mean latency, 2.400 ms p95, at 418.1 windows per second"],
-        ["Status", "Validated on Raspberry Pi hardware"]
+        ["Measured result", "On Raspberry Pi, INT8 ONNX runs a 60 second, 3 channel window in 2.392 ms mean latency, 2.400 ms p95, at 418.1 windows per second"]
       ],
       writeup: [
         "Jormungandr is a personal project I built to understand how much one can shrink a research model before it stops being useful. Seismic phase picking, the task of finding an earthquake in a waveform and timing exactly when the P and S waves arrive, is normally handled by fairly large models built for accuracy on a server, not for running anywhere near the seismograph sensor itself.",
@@ -505,8 +496,7 @@
         ["Data", "Google Earth Engine, Landsat 8/9, Sentinel-2, MODIS, GEDI, ERA5, WorldPop, OSM, WDPA"],
         ["Detection", "Miombo-adapted CODED change detection over NDFI time series"],
         ["Attribution", "Road access, settlement proximity, seasonality, fire absence, patch size, and protected-area overlap"],
-        ["Interface", "Next.js public web app plus local Streamlit dashboard"],
-        ["Status", "Research prototype with Kapiri Mposhi pilot data"]
+        ["Interface", "Next.js public web app plus local Streamlit dashboard"]
       ],
       writeup: [
         "Charcoal Sentinel is a multi-agent Earth Engine system for monitoring subtle woodland degradation tied to charcoal production and fuelwood extraction. Instead of looking only for clean land-cover conversion, it focuses on progressive canopy reduction patterns in miombo woodland, where degradation can be spatially diffuse and easy to miss.",
