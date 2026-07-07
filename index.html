@@ -358,13 +358,13 @@
   <div class="catalog-index">CATALOG — 3 ITEMS — REV. 2026</div>
   <div class="catalog-grid">
 
-    <article class="catalog-card" data-target="drone">
+    <article class="catalog-card" data-target="corvus">
       <div class="card-number">NO. 2026-001</div>
       <div class="card-art">
-        <model-viewer src="dji_tello.glb" alt="Apple Drone 3D model" auto-rotate shadow-intensity="1" exposure="1"></model-viewer>
+        <model-viewer src="dji_tello.glb" alt="Corvus 3D model" auto-rotate shadow-intensity="1" exposure="1"></model-viewer>
       </div>
-      <h2>Apple Drone</h2>
-      <p class="card-spec">A drone that flies over fruit and feeds its camera into a vision language model for live classification.</p>
+      <h2>Corvus</h2>
+      <p class="card-spec">A DJI Tello drone that scouts orchards for fruit, swapping a fixed YOLO classifier for an open-vocabulary vision language model to spot, place, and range what it sees.</p>
       <div class="card-footer">
         <span class="card-arrow">VIEW SPEC →</span>
       </div>
@@ -430,25 +430,30 @@
 <script>
   // ---- EDIT THIS OBJECT WITH YOUR OWN CONTENT / MODELS ----
   const projects = {
-    drone: {
+    corvus: {
       number: "NO. 2026-001",
-      title: "Apple Drone",
+      title: "Corvus",
       model: "dji_tello.glb",
       modelTone: "standard",
       sketch: "", // e.g. "drone-sketch.png" — a black and white engineering drawing
       video: "https://www.w3schools.com/html/mov_bbb.mp4", // placeholder — swap for your flight demo clip
       specs: [
-        ["Type", "Drone mounted vision system for fruit classification"],
-        ["Frame", "DJI Tello quadcopter platform"],
-        ["Classifier", "Vision language model, given live camera frames instead of a fixed trained model"],
-        ["Output", "Species and ripeness read out per detection"],
-        ["Storage", "Detections logged to a database across flight sessions"],
-        ["Interface", "Web dashboard for reviewing sessions and results"]
+        ["Type", "Drone mounted vision system for orchard fruit detection, ripeness, and range"],
+        ["Frame", "DJI Tello EDU quadcopter, flown and captured via the djitellopy Python SDK"],
+        ["Baseline detector", "YOLOv8 fine-tuned on a Fuji apple ripeness dataset via Roboflow, 85%+ accuracy across 9 fruit/ripeness classes"],
+        ["Open-vocab detector", "NVIDIA LocateAnything-3B swapped in as an alternate backend, run on a Thunder Compute GPU VM behind a small FastAPI server"],
+        ["Catalog", "17 fruits and berries, each with a per-ripeness reference diameter for range estimation"],
+        ["Ranging", "Pinhole camera distance formula using the Tello's focal length against each detected fruit's real world size"],
+        ["Uncertainty logic", "Detections flagged 'possible' when the top two class confidences differ by less than 30%"],
+        ["Storage", "SQLite database of detections and flight sessions, queried for ripeness and fruit type breakdowns"],
+        ["Interface", "React dashboard (\"Pomona\") for reviewing sessions, ripeness distribution, and uncertain detections"],
+        ["Repository", "<a href=\"https://github.com/hsnterp/appledrone\" target=\"_blank\" rel=\"noopener\">github.com/hsnterp/appledrone</a>"]
       ],
       writeup: [
-        "This one started as a fairly standard drone plus fixed classifier setup, a Tello quadcopter flying over piles of fruit while a trained vision model sorted what it saw into species and ripeness categories. The interesting part of the project ended up being what happened after that first version worked: swapping the fixed classifier for a vision language model instead.",
-        "A fixed model only knows the categories it was trained on. A vision language model can be asked about what it sees in plain language, so the same drone footage can be pushed toward questions a narrow classifier was never built to answer, not just is this apple ripe, but what condition is this apple actually in, and why.",
-        "The rest of the system stays fairly ordinary on purpose, a small database logging every detection and a dashboard for reviewing flight sessions, so the project reads as a genuine comparison between a narrow model and a general one on the exact same task rather than a one off demo. A proper flight demo is coming soon."
+        "Corvus started as a fairly standard drone plus fixed classifier setup: a Tello EDU quadcopter flying over piles of fruit while a YOLOv8 model, fine-tuned on a Fuji apple ripeness dataset and served through Roboflow, sorted what it saw into nine fruit and ripeness categories at 85%+ accuracy. An uncertainty layer sat on top of that, flagging any detection as \"possible\" whenever its top two class confidences landed within 30% of each other, so ambiguous calls got logged rather than silently guessed.",
+        "The interesting part of the project ended up being what happened after that first version worked: swapping the fixed classifier for an open-vocabulary vision language model. A fixed model only knows the categories it was trained on. NVIDIA's LocateAnything-3B can be handed an arbitrary list of labels instead, so the same drone footage now gets checked against a 17 fruit catalog, apples through watermelons, without retraining a thing, plus a separate pass to locate the trees, bushes, and vines those fruits are growing on.",
+        "That open-vocab swap runs off-drone by necessity: the model is served from a FastAPI endpoint on a Thunder Compute GPU VM, and the client on the flight laptop just posts base64 images and gets grounded boxes back. Each catalog entry carries a real-world diameter per ripeness stage, which feeds a pinhole camera formula built around the Tello's ~1850px focal length to turn a fruit's pixel size into an estimated distance from the drone, the first step toward plotting a WebGL map of fruit against the tree it came from.",
+        "The rest of the system stays fairly ordinary on purpose: a SQLite database logging every detection and session, and a React dashboard, branded \"Pomona\", for reviewing fruit counts, ripeness distribution, and uncertain detections across flights. That keeps the project a genuine comparison between a narrow trained classifier and a general open-vocabulary one on the exact same task, rather than a one off demo. A proper flight demo is coming soon."
       ]
     },
     seismic: {
