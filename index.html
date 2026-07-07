@@ -440,17 +440,9 @@
       specs: [
         ["Type", "Autonomous drone survey system for orchard fruit detection, ripeness, mapping, and range"],
         ["Frame", "DJI Tello EDU quadcopter, flown and captured via the djitellopy Python SDK"],
-        ["Baseline detector", "YOLOv8 fine-tuned on a Fuji apple ripeness dataset via Roboflow, 85%+ accuracy across 9 fruit/ripeness classes"],
-        ["Open-vocab detector", "NVIDIA LocateAnything-3B swapped in as an alternate backend, run on a Thunder Compute GPU VM behind a small FastAPI server"],
-        ["Catalog", "17 fruits and berries, each with a per-ripeness reference diameter for range estimation"],
-        ["Ranging", "Pinhole camera distance formula using the Tello's focal length against each detected fruit's real world size"],
-        ["Autonomous survey", "Boustrophedon \"lawnmower\" mission planner: typed takeoff/move/capture/land steps, dry-runnable and unit-tested with no drone attached"],
-        ["World mapping", "Each detection's camera-frame offset rotated by the drone's yaw and translated by its Mission-Pad pose into one stable world frame per flight"],
-        ["Deduplication", "Cross-frame detections clustered by world proximity and fruit type so overlapping survey photos don't double count the same physical fruit"],
-        ["Uncertainty logic", "Resolver compares a clean top-1 vs top-2 confidence and flags \"possible\" only within a 30% margin, keeping the runner-up linked for audit"],
-        ["Storage", "SQLite database of detections and flight sessions, queried for ripeness and fruit type breakdowns"],
-        ["Interface", "React dashboard (\"Pomona\") for reviewing sessions, ripeness distribution, and uncertain detections"],
-        ["Testing", "128+ pytest unit tests covering geometry, pose, dedup, and uncertainty logic, run in CI on Python 3.11 and 3.12"],
+        ["Detection", "YOLOv8 baseline (85%+ across 9 classes) plus a swappable NVIDIA LocateAnything-3B open-vocab backend for a 17 fruit catalog, served off a Thunder Compute GPU VM"],
+        ["Survey & mapping", "Boustrophedon \"lawnmower\" flight planner; each detection's Mission-Pad pose fused into a shared world frame and clustered across frames to avoid double counting"],
+        ["Storage & interface", "SQLite database of detections and sessions, browsed through a React dashboard (\"Pomona\") with ripeness and uncertainty breakdowns"],
         ["Repository", "<a href=\"https://github.com/hsnterp/appledrone\" target=\"_blank\" rel=\"noopener\">github.com/hsnterp/appledrone</a>"]
       ],
       writeup: [
