@@ -397,13 +397,13 @@
   <div class="catalog-index">CATALOG — 3 ITEMS — REV. 2026</div>
   <div class="catalog-grid">
 
-    <article class="catalog-card" data-target="drone">
+    <article class="catalog-card" data-target="corvus">
       <div class="card-number">NO. 2026-001</div>
       <div class="card-art">
-        <model-viewer src="dji_tello.glb" alt="Apple Drone 3D model" auto-rotate shadow-intensity="1" exposure="1"></model-viewer>
+        <model-viewer src="dji_tello.glb" alt="Corvus 3D model" auto-rotate shadow-intensity="1" exposure="1"></model-viewer>
       </div>
-      <h2>Apple Drone</h2>
-      <p class="card-spec">A drone that flies over fruit and feeds its camera into a vision language model for live classification.</p>
+      <h2>Corvus</h2>
+      <p class="card-spec">A DJI Tello drone that autonomously surveys orchards for fruit, fusing an open-vocabulary vision language model with pose-aware world mapping to spot, place, range, and deduplicate what it sees.</p>
       <div class="card-footer">
         <span class="card-arrow">VIEW SPEC →</span>
       </div>
@@ -469,25 +469,27 @@
 <script>
   // ---- EDIT THIS OBJECT WITH YOUR OWN CONTENT / MODELS ----
   const projects = {
-    drone: {
+    corvus: {
       number: "NO. 2026-001",
-      title: "Apple Drone",
+      title: "Corvus",
       model: "dji_tello.glb",
       modelTone: "standard",
       sketch: "", // e.g. "drone-sketch.png" — a black and white engineering drawing
       video: "https://www.w3schools.com/html/mov_bbb.mp4", // placeholder — swap for your flight demo clip
       specs: [
-        ["Type", "Drone mounted vision system for fruit classification"],
-        ["Frame", "DJI Tello quadcopter platform"],
-        ["Classifier", "Vision language model, given live camera frames instead of a fixed trained model"],
-        ["Output", "Species and ripeness read out per detection"],
-        ["Storage", "Detections logged to a database across flight sessions"],
-        ["Interface", "Web dashboard for reviewing sessions and results"]
+        ["Type", "Autonomous drone survey system for orchard fruit detection, ripeness, mapping, and range"],
+        ["Frame", "DJI Tello EDU quadcopter, flown and captured via the djitellopy Python SDK"],
+        ["Detection", "YOLOv8 baseline (85%+ across 9 classes) plus a swappable NVIDIA LocateAnything-3B open-vocab backend for a 17 fruit catalog, served off a Thunder Compute GPU VM"],
+        ["Survey & mapping", "Boustrophedon \"lawnmower\" flight planner; each detection's Mission-Pad pose fused into a shared world frame and clustered across frames to avoid double counting"],
+        ["Storage & interface", "SQLite database of detections and sessions, browsed through a React dashboard (\"Pomona\") with ripeness and uncertainty breakdowns"],
+        ["Repository", "<a href=\"https://github.com/hsnterp/appledrone\" target=\"_blank\" rel=\"noopener\">github.com/hsnterp/appledrone</a>"]
       ],
       writeup: [
-        "This one started as a fairly standard drone plus fixed classifier setup, a Tello quadcopter flying over piles of fruit while a trained vision model sorted what it saw into species and ripeness categories. The interesting part of the project ended up being what happened after that first version worked: swapping the fixed classifier for a vision language model instead.",
-        "A fixed model only knows the categories it was trained on. A vision language model can be asked about what it sees in plain language, so the same drone footage can be pushed toward questions a narrow classifier was never built to answer, not just is this apple ripe, but what condition is this apple actually in, and why.",
-        "The rest of the system stays fairly ordinary on purpose, a small database logging every detection and a dashboard for reviewing flight sessions, so the project reads as a genuine comparison between a narrow model and a general one on the exact same task rather than a one off demo. A proper flight demo is coming soon."
+        "Corvus began as a pretty standard drone-plus-classifier setup. A Tello EDU quadcopter flies over piles of fruit, and a YOLOv8 model I fine-tuned on a Fuji apple ripeness dataset (served through Roboflow) sorts what it sees into nine fruit-and-ripeness categories at 85%+ accuracy. I also built in an uncertainty layer: if the top two class confidences land within 30% of each other, the detection gets flagged \"possible\" instead of me just trusting whichever one happened to win.",
+        "Here's where it got fun. Once that first version worked, I ripped out the fixed classifier and swapped in an open-vocabulary vision language model instead. A fixed model only knows what it was trained on, but NVIDIA's LocateAnything-3B will take any list of labels you hand it. So now the same drone footage gets checked against a 17 fruit catalog, apples all the way to watermelons, with zero retraining, plus a second pass just to find the trees, bushes, and vines everything's growing on.",
+        "That model's too heavy to run on the drone itself, so it lives on a Thunder Compute GPU box behind a small FastAPI server, and my flight laptop just ships it base64 images and gets grounded boxes back. Each fruit in the catalog has a real-world diameter per ripeness stage, and I run that through a pinhole camera formula, built around the Tello's ~1850px focal length, to turn \"how big is this apple in pixels\" into \"how far away is it.\"",
+        "The most recent round of work went after stuff I'd been glossing over: the actual geometry of flying a survey. I built a flight planner that lays out a whole orchard pass as a boustrophedon \"lawnmower\" sweep, basically a typed list of takeoff, move, capture, and land steps I can dry-run and test without a drone anywhere nearby. I also started recording the Tello's Mission-Pad pose, its position and heading, at every photo instead of throwing that data away. That pose gets fused into the math so each detection lands on the same world coordinate no matter which overlapping photo caught it, which is what finally let me deduplicate: cluster detections by proximity and fruit type so the same apple doesn't get counted five times just because five photos overlapped.",
+        "I also went back and fixed the uncertainty logic, which used to pair up competing predictions by iteration order and could silently drop a class if three or more were in the running. Now it just compares the clean top-1 versus top-2 confidence and keeps the runner-up around for auditing instead of tossing it. Everything else stays pretty ordinary on purpose: SQLite for detections and sessions, a React dashboard I branded \"Pomona\" for browsing fruit counts and ripeness breakdowns, and, these days, a 128-plus test pytest suite running in CI on Python 3.11 and 3.12 so I'm not just eyeballing whether any of this still works. A proper flight demo is coming soon."
       ]
     },
     seismic: {
