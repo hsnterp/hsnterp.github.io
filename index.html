@@ -325,6 +325,45 @@
     text-align:left;
   }
 
+  .segment-list{
+    margin:0 auto 30px;
+    max-width:76ch;
+    border-top:1px solid var(--rule);
+  }
+  .segment{
+    padding:16px 0;
+    border-bottom:1px solid var(--rule);
+  }
+  .segment-meta{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    gap:12px;
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.06em;
+    color:var(--muted);
+    text-transform:uppercase;
+    margin-bottom:6px;
+  }
+  .segment-label{
+    font-family:var(--mono);
+    font-size:13px;
+    margin-bottom:8px;
+  }
+  .segment-desc{
+    font-size:15px;
+    line-height:1.65;
+    margin:0;
+  }
+  .segment video{
+    width:100%;
+    display:block;
+    border:1px solid var(--rule);
+    background:#000;
+    margin-bottom:10px;
+  }
+
   footer{
     border-top:2px solid var(--rule-strong);
     padding:24px clamp(20px,5vw,64px);
@@ -484,7 +523,40 @@
         "I also checked the student against PhaseNet, a widely used lightweight picker, on the same STEAD test split. PhaseNet runs 268,443 parameters and edges out the student on detection F1 (0.9957 versus 0.9925) and S pick timing (62.1 ms versus 71.4 ms), but the student leads on P pick timing (36.9 ms versus 47.4 ms) while using about a fifth as many parameters.",
         "To check whether the model learned something that generalizes past its own benchmark, I ran the frozen student, no retraining, on PNW, a Pacific Northwest seismic dataset with a different network, region, and instrument mix than STEAD. P arrival timing transferred almost exactly, 37.0 ms mean error on PNW versus 36.9 ms in distribution, while detection F1 dropped from 0.9925 to 0.9493 as the model turned more conservative on unfamiliar low signal to noise events.",
         "The project has since grown a second variant built specifically for that original transmission gating question. The base U Net looks at a whole 60 second window at once, which a live sensor doesn't have the luxury of, so a strictly causal version was trained where every output sample depends only on past input, letting the same picker run as a true online stream instead of scoring after the fact. Run that way against tuned STA/LTA on identical data, the causal model files about 6x fewer false triggers per hour (3.1 versus 17.5) and lands its onset time about 27x tighter (54 ms versus 1,458 ms mean error). It doesn't win on speed, STA/LTA still reacts faster on average since it doesn't wait to confirm shape, but it's dramatically less likely to fire on nothing, which is the number that actually costs bandwidth when a sensor is expected to trigger its own transmissions with no one checking each one. Tested zero shot on the PNW network, the causal model is also noticeably more brittle than the base model, a reminder that seeing only the past narrows what the model has to fall back on when conditions shift.",
-        "There's now a real edge demo built around that gating question, running on a Raspberry Pi with an MPU6050 accelerometer wired in. Since the MPU6050 is roughly a million times less sensitive than a broadband seismometer and can't actually register a real earthquake, its job in the demo is to prove the full pipeline, causal preprocessing, inference, and the transmission gating decision, runs in real time on the actual hardware and fires correctly on a physical vibration. Real phase picking on real earthquakes is demonstrated separately, by streaming real STEAD waveforms through that same pipeline: in a six minute replay session, the model transmitted 4 packets (8,746 bytes, zero false triggers) against STA/LTA's 7 packets (27,712 bytes, one false trigger), versus 216,000 bytes for continuous raw transmission over the same session. That's roughly a 25x bandwidth reduction against raw transmission, and about a third of what STA/LTA needed for the same events. The DEMO clip above plays that comparison out directly: four real STEAD earthquakes and a pure noise segment, the raw waveform scrolling across the top, STA/LTA's ratio in the middle, the model's detection probability on the bottom. The two lower lanes flash when their gate fires, so it's visible in real time that STA/LTA lights up far more often than the model does on the exact same ground motion, with the true P and S arrivals marked and the model's own picks landing right on them.",
+        "There's now a real edge demo built around that gating question, running on a Raspberry Pi with an MPU6050 accelerometer wired in. Since the MPU6050 is roughly a million times less sensitive than a broadband seismometer and can't actually register a real earthquake, its job in the demo is to prove the full pipeline, causal preprocessing, inference, and the transmission gating decision, runs in real time on the actual hardware and fires correctly on a physical vibration. Real phase picking on real earthquakes is demonstrated separately, by streaming real STEAD waveforms through that same pipeline: in a six minute replay session, the model transmitted 4 packets (8,746 bytes, zero false triggers) against STA/LTA's 7 packets (27,712 bytes, one false trigger), versus 216,000 bytes for continuous raw transmission over the same session. That's roughly a 25x bandwidth reduction against raw transmission, and about a third of what STA/LTA needed for the same events. The DEMO clip above plays that comparison out directly: four real STEAD earthquakes and two ambient noise segments, the raw waveform scrolling across the top, STA/LTA's ratio in the middle, the model's detection probability on the bottom. The two lower lanes flash when their gate fires, so it's visible in real time that STA/LTA lights up far more often than the model does on the exact same ground motion, with the true P and S arrivals marked and the model's own picks landing right on them. STA/LTA is the most comparable baseline here, since it's the classical trigger meant to run in exactly this position, on the sensor, with no server round trip, so it's the fair comparison rather than a server scale model. Four clips from that same recording, cut out individually, make the argument clearest:",
+        {
+          type: "segments",
+          items: [
+            {
+              order: "1ST EARTHQUAKE",
+              time: "0:11 clip",
+              label: "Northern Chile, 2013-08-07",
+              src: "jormungandr-gating-eq1.mp4",
+              desc: "STA/LTA fires twice, once on the P onset and again on the S arrival: two packets for one earthquake. The model fires once and doesn't refire for the S phase it already caught."
+            },
+            {
+              order: "2ND EARTHQUAKE",
+              time: "0:11 clip",
+              label: "Central Chile, 2015-02-04",
+              src: "jormungandr-gating-eq2.mp4",
+              desc: "The model fires first, half a second before STA/LTA reacts to the same onset. STA/LTA still fires again later near the S arrival: two packets to the model's one."
+            },
+            {
+              order: "AMBIENT NOISE",
+              time: "0:11 clip",
+              label: "Ambient Site, no earthquake",
+              src: "jormungandr-gating-noise.mp4",
+              desc: "No event here, just ordinary ground motion. STA/LTA fires anyway, a false trigger with a real cost. The model stays flat the whole clip."
+            },
+            {
+              order: "BOTH AGREE",
+              time: "0:11 clip",
+              label: "Southern California, 2012-09-03",
+              src: "jormungandr-gating-both-agree.mp4",
+              desc: "The control case: both gates fire at the same instant on the same onset, no double-firing on either side. On a clear event the model matches STA/LTA exactly, which is what makes the other three clips a fair comparison rather than a cherry-picked one."
+            }
+          ]
+        },
         "On the Raspberry Pi 5, the INT8 ONNX model processes a 60 second, 3 channel window in 2.392 ms mean latency with one CPU thread, about 418.1 windows per second. With the default 30 second streaming hop, that is about 12,543 times faster than real time."
       ]
     },
@@ -574,6 +646,20 @@
           <img src="${block.src}" alt="${block.alt}">
           <figcaption>${block.caption}</figcaption>
         </figure>
+      `;
+    }
+    if(block.type === 'segments'){
+      return `
+        <div class="segment-list">
+          ${block.items.map(s => `
+            <div class="segment">
+              <video src="${s.src}" controls playsinline loop></video>
+              <div class="segment-meta"><span>${s.order}</span><span>${s.time}</span></div>
+              <div class="segment-label">${s.label}</div>
+              <p class="segment-desc">${s.desc}</p>
+            </div>
+          `).join('')}
+        </div>
       `;
     }
     return '';
